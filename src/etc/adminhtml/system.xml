@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright - elgentos ecommerce solutions (https://elgentos.nl)
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="customer">
+            <tab>customer</tab>
+            <group id="openkvk" translate="label" sortOrder="50"
+                   showInDefault="10" showInWebsite="1" showInStore="1">
+                <label>OpenKVK</label>
+                <field id="enabled" translate="label" type="select"
+                       sortOrder="1" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="api_key" translate="label comment" type="text"
+                       sortOrder="20" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>API Key</label>
+                    <comment><![CDATA[You can get the API key from your account on <a href="https://overheid.io">overheid.io</a>.]]></comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

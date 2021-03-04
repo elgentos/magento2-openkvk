@@ -1,0 +1,21 @@
+# Copyright - elgentos ecommerce solutions (https://elgentos.nl)
+
+type Query {
+    openkvk(
+        coc: String @doc(description: "The Chamber of Commerce number to search with")
+        postcode: String @doc(description: "The postcode to search with")
+        housenumber: String @doc(description: "The house number to search with")
+    ): [OpenKvk]
+    @resolver(class:"Elgentos\\OpenKvk\\Model\\Resolver\\Suggestions")
+    @doc(description: "Fetch results of companies from OpenKvk")
+}
+
+type OpenKvk @doc(description: "Results from an OpenKvk fetch") {
+    company: String
+    coc: String
+    city: String
+    zip: String
+    street_1: String
+    street_2: String
+}
+
