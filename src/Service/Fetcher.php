@@ -1,26 +1,25 @@
 <?php
 
-/**
- * Copyright - elgentos ecommerce solutions (https://elgentos.nl)
- */
-
 declare(strict_types=1);
 
-namespace Elgentos\OpenKvk\Model;
+namespace Elgentos\OpenKvk\Service;
 
-use Magento\Framework\HTTP\Client\Curl;
+use Elgentos\OpenKvk\Model\Config;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use InvalidArgumentException;
 use Magento\Framework\Serialize\Serializer\Json;
 
-class Fetch
+class Fetcher
 {
-    private const OPENKVK_BASE_URL = 'https://api.overheid.io/',
-        OPENKVK_SUGGEST_SIZE       = 25;
+    public const OPENKVK_BASE_URL = 'https://api.overheid.io/openkvk/',
+        OPENKVK_SUGGEST_SIZE      = 25;
 
     /** @var Config */
     private Config $configModel;
 
-    /** @var Curl */
-    private Curl $client;
+    /** @var Client */
+    private Client $client;
 
     /** @var Json */
     private Json $serializer;
@@ -28,12 +27,12 @@ class Fetch
     /**
      * Constructor.
      *
-     * @param Curl   $client
+     * @param Client $client
      * @param Config $configModel
      * @param Json   $serializer
      */
     public function __construct(
-        Curl $client,
+        Client $client,
         Config $configModel,
         Json $serializer
     ) {
@@ -51,8 +50,7 @@ class Fetch
      */
     public function fetchSuggestResultsByCoc(string $query): array
     {
-        $url      = self::OPENKVK_BASE_URL . 'openkvk/';
-        $params   = [
+        $params = [
             'size' => self::OPENKVK_SUGGEST_SIZE,
             'fields' => [
                 'handelsnaam',
@@ -68,7 +66,7 @@ class Fetch
             'query' => $query
         ];
 
-        return $this->fetch($url, $params);
+        return $this->fetch($params);
     }
 
     /**
@@ -81,7 +79,6 @@ class Fetch
      */
     public function fetchSuggestResultsByAddress(string $postcode, ?string $houseNumber): array
     {
-        $url    = self::OPENKVK_BASE_URL . 'openkvk/';
         $params = [
             'size' => self::OPENKVK_SUGGEST_SIZE,
             'fields' => [
@@ -98,7 +95,7 @@ class Fetch
             ]
         ];
 
-        return $this->fetch($url, $params);
+        return $this->fetch($params);
     }
 
     /**
@@ -106,7 +103,7 @@ class Fetch
      *
      * @return array
      */
-    private function getHeaders(): array
+    public function getHeaders(): array
     {
         return ['ovio-api-key' => $this->configModel->getApiKey()];
     }
@@ -114,25 +111,30 @@ class Fetch
     /**
      * Do the call to the API to fetch the data and normalize it.
      *
-     * @param string $url
-     * @param array  $params
+     * @param array $params
      *
      * @return array
+     * @throws GuzzleException
      */
-    private function fetch(string $url, array $params): array
+    private function fetch(array $params): array
     {
-        $this->client->setHeaders($this->getHeaders());
-        $this->client->get($url . '?' . http_build_query($params));
-
-        $result   = [];
-        $response = $this->client->getBody();
-
-        if (empty($response)) {
-            return ['error' => __('No results found.')];
-        }
-
         try {
-            $response = $this->serializer->unserialize($response);
+            $result   = [];
+            $response = $this->client->request(
+                'GET',
+                self::OPENKVK_BASE_URL . '?' . http_build_query($params),
+                [
+                    'headers' => $this->getHeaders()
+                ]
+            );
+
+            $responseBody = $response->getBody();
+
+            if ($response->getStatusCode() !== 200 || empty($responseBody)) {
+                return ['error' => __('No results found.')];
+            }
+
+            $response = $this->serializer->unserialize($responseBody);
 
             if (isset($response['_embedded']) && isset($response['_embedded']['bedrijf'])) {
                 foreach ($response['_embedded']['bedrijf'] as $item) {
@@ -146,7 +148,7 @@ class Fetch
                     ];
                 }
             }
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             $result = ['error' => __('Unable to fetch results')];
         }
 

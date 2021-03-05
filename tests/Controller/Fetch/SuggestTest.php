@@ -1,21 +1,15 @@
 <?php
 
-/**
- * Copyright - elgentos ecommerce solutions (https://elgentos.nl)
- */
-
 declare(strict_types=1);
 
 namespace Elgentos\OpenKvk\Tests\Block;
 
 use Elgentos\OpenKvk\Controller\Fetch\Suggest;
 use Elgentos\OpenKvk\Model\Config;
-use Elgentos\OpenKvk\Model\Fetch;
+use Elgentos\OpenKvk\Service\Fetcher;
 use Magento\Framework\Controller\Result\Json as JsonResult;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\HTTP\Client\Curl;
-use Magento\Framework\Serialize\Serializer\Json;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -107,7 +101,7 @@ class SuggestTest extends TestCase
         $jsonResult  = $this->createMock(JsonResult::class);
         $configModel = $this->createMock(Config::class);
         $jsonFactory = $this->createMock(JsonFactory::class);
-        $fetcher     = $this->createMock(Fetch::class);
+        $fetcher     = $this->createMock(Fetcher::class);
 
         $subject = new Suggest(
             $request,

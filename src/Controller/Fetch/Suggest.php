@@ -1,22 +1,16 @@
 <?php
 
-/**
- * Copyright - elgentos ecommerce solutions (https://elgentos.nl)
- */
-
 declare(strict_types=1);
 
 namespace Elgentos\OpenKvk\Controller\Fetch;
 
 use Elgentos\OpenKvk\Model\Config;
-use Elgentos\OpenKvk\Model\Fetch;
+use Elgentos\OpenKvk\Service\Fetcher;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\ResultInterface;
-use Magento\Framework\HTTP\Client\Curl;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\Serialize\Serializer\Json;
 
 class Suggest implements HttpPostActionInterface
 {
@@ -29,8 +23,8 @@ class Suggest implements HttpPostActionInterface
     /** @var JsonFactory */
     private JsonFactory $resultJsonFactory;
 
-    /** @var Fetch */
-    private Fetch $fetcher;
+    /** @var Fetcher */
+    private Fetcher $fetcher;
 
     /**
      * Constructor.
@@ -38,13 +32,13 @@ class Suggest implements HttpPostActionInterface
      * @param Http        $request
      * @param Config      $configModel
      * @param JsonFactory $resultJsonFactory
-     * @param Fetch       $fetcher
+     * @param Fetcher     $fetcher
      */
     public function __construct(
         Http $request,
         Config $configModel,
         JsonFactory $resultJsonFactory,
-        Fetch $fetcher
+        Fetcher $fetcher
     ) {
         $this->request           = $request;
         $this->configModel       = $configModel;

@@ -1,7 +1,3 @@
-/**
- * Copyright - elgentos ecommerce solutions (https://elgentos.nl)
- */
-
 function initializeOpenKvk() {
     "use strict";
 

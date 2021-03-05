@@ -1,23 +1,20 @@
 <?php
 
-/**
- * Copyright - elgentos ecommerce solutions (https://elgentos.nl)
- */
-
 declare(strict_types=1);
 
 namespace Elgentos\OpenKvk\Tests\Model;
 
 use Elgentos\OpenKvk\Model\Config;
-use Elgentos\OpenKvk\Model\Fetch;
-use Magento\Framework\HTTP\Client\Curl;
+use Elgentos\OpenKvk\Service\Fetcher;
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Response;
 use Magento\Framework\Serialize\Serializer\Json;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversDefaultClass \Elgentos\OpenKvk\Model\Fetch
+ * @coversDefaultClass \Elgentos\OpenKvk\Service\Fetcher
  */
-class FetchTest extends TestCase
+class FetcherTest extends TestCase
 {
     /** @var string  */
     private string $validJsonResult = '{
@@ -46,9 +43,9 @@ class FetchTest extends TestCase
     }';
 
     /**
-     * @param string      $postcode
-     * @param string      $houseNumber
-     * @param string|null $jsonString
+     * @param string            $postcode
+     * @param string            $houseNumber
+     * @param string|null|array $jsonString
      *
      * @return void
      *
@@ -63,15 +60,15 @@ class FetchTest extends TestCase
     public function testFetchSuggestResultsByAddress(
         string $postcode,
         string $houseNumber,
-        ?string $jsonString
+        $jsonString
     ): void {
         $this->createSubjectInstance($jsonString)
             ->fetchSuggestResultsByAddress($postcode, $houseNumber);
     }
 
     /**
-     * @param string      $coc
-     * @param string|null $jsonString
+     * @param string            $coc
+     * @param string|null|array $jsonString
      *
      * @return void
      *
@@ -85,10 +82,49 @@ class FetchTest extends TestCase
      */
     public function testFetchSuggestResultsByCoc(
         string $coc,
-        ?string $jsonString
+        $jsonString
     ): void {
         $this->createSubjectInstance($jsonString)
             ->fetchSuggestResultsByCoc($coc);
+    }
+
+    /**
+     * Create an instance of the class that is used in the tests.
+     *
+     * @param string|null|array $jsonString
+     *
+     * @return Fetcher
+     */
+    private function createSubjectInstance($jsonString): Fetcher
+    {
+        $guzzleClient   = $this->createMock(Client::class);
+        $configModel    = $this->createMock(Config::class);
+        $jsonSerializer = new Json();
+
+        $configModel->expects(self::once())
+            ->method('getApiKey')
+            ->willReturn('foobar');
+
+        $subject = new Fetcher(
+            $guzzleClient,
+            $configModel,
+            $jsonSerializer
+        );
+
+        $response = $this->createMock(Response::class);
+        $response->expects(self::once())
+            ->method('getStatusCode')
+            ->willReturn(200);
+
+        $response->expects(self::once())
+            ->method('getBody')
+            ->willReturn($jsonString);
+
+        $guzzleClient->expects(self::once())
+            ->method('request')
+            ->willReturn($response);
+
+        return $subject;
     }
 
     /**
@@ -113,35 +149,7 @@ class FetchTest extends TestCase
                 '1234AB',
                 '1',
                 $this->validJsonResult
-            ],
+            ]
         ];
-    }
-
-    /**
-     * Create an instance of the class that is used in the tests.
-     *
-     * @param string|null $jsonString
-     *
-     * @return Fetch
-     */
-    private function createSubjectInstance(?string $jsonString): Fetch
-    {
-        $curlClient     = $this->createMock(Curl::class);
-        $configModel    = $this->createMock(Config::class);
-        $jsonSerializer = new Json();
-
-        $curlClient->expects(self::once())
-            ->method('getBody')
-            ->willReturn($jsonString);
-
-        $configModel->expects(self::once())
-            ->method('getApiKey')
-            ->willReturn('foobar');
-
-        return new Fetch(
-            $curlClient,
-            $configModel,
-            $jsonSerializer
-        );
     }
 }

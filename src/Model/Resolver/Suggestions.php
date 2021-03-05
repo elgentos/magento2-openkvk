@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Elgentos\OpenKvk\Model\Resolver;
 
 use Elgentos\OpenKvk\Model\Config;
-use Elgentos\OpenKvk\Model\Fetch;
+use Elgentos\OpenKvk\Service\Fetcher;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Exception\GraphQlInputException;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
@@ -18,21 +18,21 @@ class Suggestions implements ResolverInterface
     /** @var Config */
     private Config $configModel;
 
-    /** @var Fetch */
-    private Fetch $fetcher;
+    /** @var Fetcher */
+    private Fetcher $fetcher;
 
     /**
      * Constructor.
      *
-     * @param Config      $configModel
-     * @param Fetch       $fetcher
+     * @param Config  $configModel
+     * @param Fetcher $fetcher
      */
     public function __construct(
         Config $configModel,
-        Fetch $fetcher
+        Fetcher $fetcher
     ) {
-        $this->configModel       = $configModel;
-        $this->fetcher           = $fetcher;
+        $this->configModel = $configModel;
+        $this->fetcher     = $fetcher;
     }
 
     /**
@@ -42,8 +42,7 @@ class Suggestions implements ResolverInterface
      * @param array|null       $value
      * @param array|null       $args
      *
-     * @return Value|mixed|void
-     * @throws GraphQlInputException
+     * @return Value|array
      */
     public function resolve(
         Field $field,
@@ -52,10 +51,6 @@ class Suggestions implements ResolverInterface
         array $value = null,
         array $args = null
     ) {
-        if (!isset($args['coc']) && !isset($args['postcode'])) {
-            throw new GraphQlInputException(__('No data provided.'));
-        }
-
         $coc         = $args['coc'] ?? null;
         $postcode    = $args['postcode'] ?? null;
         $houseNumber = $args['housenumber'] ?? null;
