@@ -1,0 +1,14 @@
+<?php
+
+declare(strict_types=1);
+
+/** @var View $block */
+/** @var Escaper $escaper */
+
+use Elgentos\OpenKvk\Block\View;
+use Magento\Framework\Escaper;
+
+?>
+<?php if ($block->isEnabled()): ?>
+<script async src="<?= $escaper->escapeUrl($block->getViewFileUrl('Elgentos_OpenKvk::js/openkvk.js')) ?>"></script>
+<?php endif ?>

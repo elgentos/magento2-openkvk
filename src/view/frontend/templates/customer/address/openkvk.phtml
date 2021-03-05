@@ -1,0 +1,80 @@
+<?php
+
+declare(strict_types=1);
+
+/** @var View $block */
+/** @var Escaper $escaper */
+
+use Elgentos\OpenKvk\Block\View;
+use Magento\Framework\Escaper;
+?>
+<?php if ($block->isEnabled()): ?>
+    <form id="openkvk-fetch-form"
+          class="mb-6"
+          x-data="initializeOpenKvk()">
+        <div class="card">
+            <fieldset class="fieldset">
+                <legend class="legend">
+                    <span><?= $escaper->escapeHtml(__('Find Your Company')) ?></span>
+                </legend>
+                <p class="mb-4"><?= $escaper->escapeHtml(__('Fill in your postcode or Chamber of Commerce number')) ?></p>
+
+                <div class="bg-red bg-opacity-70 p-2 mb-3"
+                     x-cloak
+                     :class="{hidden : errorMessage === null}">
+                    <span x-text="errorMessage"/>
+                </div>
+
+                <div class="mb-3">
+                    <input type="text" name="openkvk[postcode]"
+                           pattern="(\d{4})([a-zA-Z]{2})" maxlength="6"
+                           placeholder="<?= $escaper->escapeHtmlAttr(__('Postcode')) ?>" />
+                    <input type="text" name="openkvk[housenumber]"
+                           pattern="(\d{1,5})"
+                           placeholder="<?= $escaper->escapeHtmlAttr(__('House Number')) ?>" />
+                </div>
+
+                <div class="mb-3">
+                    <input type="text" name="openkvk[coc]" pattern="(\d{8})"
+                           maxlength="8"
+                           placeholder="<?= $escaper->escapeHtmlAttr(__('Chamber of Commerce Number')) ?>" />
+                </div>
+
+                <div class="">
+                    <button class="btn btn-secondary" type="button"
+                            x-on:click="fetchSuggestions()">
+                        <?= $escaper->escapeHtml(__('Find Company')) ?>
+                    </button>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="bg-black bg-opacity-60 fixed inset-0 z-40" x-cloak
+             :class="{'hidden': open === false}"
+             @keydown.window.escape="closeSuggestions()">
+            <div class="bg-white fixed w-1/4 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-md max-h-10/12 overflow-y-scroll"
+                 @click.away="closeSuggestions()">
+                <div class="p-3 font-bold border-b-1 flex justify-between items-center">
+                    <?= $escaper->escapeHtml(__('Found Companies')) ?>
+                    <a href="javascript:void(0)" x-on:click="closeSuggestions()">
+                        <svg class="icon fill-current h-6 w-6 ml-auto cursor-pointer">
+                            <use xlink:href="<?= $block->escapeUrl($block->getViewFileUrl('/images/sprite.svg#icon-cross')) ?>"></use>
+                        </svg>
+                    </a>
+                </div>
+                <ul class="text-sm">
+                    <template x-for="suggestion in suggestions" hidden>
+                        <li x-on:click="selectSuggestion(suggestion)"
+                            class="hover:bg-gray-light p-3 cursor-pointer">
+                            <strong x-text="suggestion.company"></strong><br />
+                            <span x-text="suggestion.coc"></span><br />
+                            <span x-text="suggestion.street_1"></span> <span x-text="suggestion.street_2"></span><br />
+                            <span x-text="suggestion.zip"></span> <span x-text="suggestion.city"></span>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+        </div>
+    </form>
+    <?= $block->getChildHtml('openkvk_js') ?>
+<?php endif; ?>

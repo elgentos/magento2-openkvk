@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="customer_address_edit">
+            <block class="Elgentos\OpenKvk\Block\View" name="openkvk_form"
+                   template="Elgentos_OpenKvk::customer/address/openkvk.phtml">
+                <block class="Elgentos\OpenKvk\Block\View" name="openkvk_js"
+                       template="Elgentos_OpenKvk::js/openkvk.phtml"/>
+            </block>
+        </referenceBlock>
+    </body>
+</page>
