@@ -90,10 +90,13 @@ class Fetcher
                 'huisnummer'
             ],
             'filters' => [
-                'postcode' => $postcode,
-                'huisnummer' => $houseNumber
+                'postcode' => $postcode
             ]
         ];
+
+        if (!empty($houseNumber)) {
+            $params['filters']['huisnummer'] = $houseNumber;
+        }
 
         return $this->fetch($params);
     }
@@ -136,7 +139,11 @@ class Fetcher
 
             $response = $this->serializer->unserialize($responseBody);
 
-            if (isset($response['_embedded']) && isset($response['_embedded']['bedrijf'])) {
+            if (
+                isset($response['_embedded']) &&
+                isset($response['_embedded']['bedrijf']) &&
+                count($response['_embedded']['bedrijf'])
+            ) {
                 foreach ($response['_embedded']['bedrijf'] as $item) {
                     $result[] = [
                         'company' => $item['handelsnaam'] ?? null,
