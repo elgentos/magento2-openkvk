@@ -92,10 +92,13 @@ class Fetcher
                 'actief'
             ],
             'filters' => [
-                'postcode' => $postcode,
-                'huisnummer' => $houseNumber
+                'postcode' => $postcode
             ]
         ];
+
+        if (!empty($houseNumber)) {
+            $params['filters']['huisnummer'] = $houseNumber;
+        }
 
         return $this->fetch($params);
     }
