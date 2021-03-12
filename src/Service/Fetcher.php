@@ -13,7 +13,7 @@ use Magento\Framework\Serialize\Serializer\Json;
 class Fetcher
 {
     public const OPENKVK_BASE_URL = 'https://api.overheid.io/openkvk/',
-        OPENKVK_SUGGEST_SIZE      = 25;
+        OPENKVK_SUGGEST_SIZE      = 99;
 
     /** @var Config */
     private Config $configModel;
@@ -58,7 +58,8 @@ class Fetcher
                 'dossiernummer',
                 'plaats',
                 'straat',
-                'huisnummer'
+                'huisnummer',
+                'actief'
             ],
             'queryfields' => [
                 'dossiernummer'
@@ -87,7 +88,8 @@ class Fetcher
                 'dossiernummer',
                 'plaats',
                 'straat',
-                'huisnummer'
+                'huisnummer',
+                'actief'
             ],
             'filters' => [
                 'postcode' => $postcode,
@@ -138,6 +140,10 @@ class Fetcher
 
             if (isset($response['_embedded']) && isset($response['_embedded']['bedrijf'])) {
                 foreach ($response['_embedded']['bedrijf'] as $item) {
+                    if (!isset($item['actief']) || $item['actief'] === false) {
+                        continue;
+                    }
+
                     $result[] = [
                         'company' => $item['handelsnaam'] ?? null,
                         'coc' => $item['dossiernummer'] ?? null,
