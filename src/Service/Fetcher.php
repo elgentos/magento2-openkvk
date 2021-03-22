@@ -92,7 +92,7 @@ class Fetcher
                 'actief'
             ],
             'filters' => [
-                'postcode' => $postcode
+                'postcode' => str_replace(' ', '', $postcode)
             ]
         ];
 
